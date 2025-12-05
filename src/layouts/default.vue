@@ -1,15 +1,10 @@
 <template>
-  <div>
+  <div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-200">
     <TheNavigation />
-    <main
-      px-4 py-10
-      text="center gray-700 dark:gray-200"
-    >
+    <main class="flex-grow pt-16 px-4 py-10 text-center">
       <RouterView />
+    </main>
     <TheFooter />
-    <div mx-auto mt-5 text-center text-sm opacity-50>
-      [Default Layout]
-    </div>
-  </main>
+    <BackToTop />
   </div>
 </template>
