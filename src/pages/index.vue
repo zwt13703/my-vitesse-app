@@ -1,3 +1,4 @@
+<!-- eslint-disable no-console -->
 <script setup lang="ts">
 defineOptions({
   name: 'IndexPage',
@@ -6,230 +7,541 @@ defineOptions({
 useHead({
   title: '艺体志愿宝 - 专业的艺术体育类志愿填报辅助平台',
 })
+
+// User store for login status
+const userStore = useUserStore()
+
+// Form state
+const examType = ref('history') // 默认选中历史组
+const selectedElectives = ref<string[]>([]) // 选考科目，最多2项
+const majorCategory = ref('') // 专业类别
+const selectedSubmajors = ref<string[]>([]) // 专业选课
+
+// Form validation
+const errors = ref({
+  examType: '',
+  electives: '',
+  majorCategory: '',
+  submajors: '',
+  scores: {
+    unified: '',
+    culture: '',
+    chinese: '',
+    english: '',
+  },
+})
+
+// Score inputs
+const scores = ref({
+  unified: '', // 统考成绩/主项成绩
+  culture: '', // 文化成绩
+  chinese: '', // 语文成绩
+  english: '', // 英语成绩
+})
+
+// Elective options (4选2)
+const electiveOptions = [
+  { label: '地理', value: 'geography' },
+  { label: '政治', value: 'politics' },
+  { label: '化学', value: 'chemistry' },
+  { label: '生物', value: 'biology' },
+]
+
+// Major category options
+const majorCategoryOptions = [
+  { label: '美术与设计类', value: 'art_design' },
+  { label: '播音与主持类', value: 'broadcasting' },
+  { label: '表演类', value: 'performance' },
+  { label: '音乐类', value: 'music' },
+  { label: '舞蹈类', value: 'dance' },
+  { label: '书法类', value: 'calligraphy' },
+  { label: '戏曲类', value: 'opera' },
+  { label: '体育类', value: 'sports' },
+]
+
+// Sub-major options based on major category
+function getSubmajorOptions() {
+  switch (majorCategory.value) {
+    case 'performance':
+      return [
+        { label: '服装表演', value: 'fashion' },
+        { label: '戏剧影视导演', value: 'film_director' },
+        { label: '戏剧影视表演', value: 'film_performance' },
+      ]
+    case 'music':
+      return [
+        { label: '音乐表演声乐', value: 'vocal' },
+        { label: '音乐表演器乐', value: 'instrumental' },
+        { label: '音乐教育', value: 'music_education' },
+      ]
+    default:
+      return []
+  }
+}
+
+// Handle elective selection (最多2项)
+function handleElectiveChange(value: string) {
+  const index = selectedElectives.value.indexOf(value)
+  if (index === -1) {
+    if (selectedElectives.value.length < 2) {
+      selectedElectives.value.push(value)
+    }
+  }
+  else {
+    selectedElectives.value.splice(index, 1)
+  }
+  validateForm()
+}
+
+// Handle sub-major selection
+function handleSubmajorChange(value: string) {
+  const index = selectedSubmajors.value.indexOf(value)
+  if (index === -1) {
+    selectedSubmajors.value.push(value)
+  }
+  else {
+    selectedSubmajors.value.splice(index, 1)
+  }
+  validateForm()
+}
+
+// Validate form
+function validateForm() {
+  // Reset errors
+  errors.value = {
+    examType: '',
+    electives: '',
+    majorCategory: '',
+    submajors: '',
+    scores: {
+      unified: '',
+      culture: '',
+      chinese: '',
+      english: '',
+    },
+  }
+
+  // Validate exam type
+  if (!examType.value) {
+    errors.value.examType = '请选择考试类型'
+  }
+
+  // Validate electives (至少1项？需求中没说，但最多2项)
+  if (selectedElectives.value.length === 0) {
+    errors.value.electives = '请选择至少1门选考科目'
+  }
+
+  // Validate major category
+  if (!majorCategory.value) {
+    errors.value.majorCategory = '请选择专业类别'
+  }
+
+  // Validate submajors based on major category
+  if (majorCategory.value === 'performance') {
+    // No specific minimum mentioned
+  }
+  else if (majorCategory.value === 'music') {
+    // Must choose at least one of vocal or instrumental
+    const hasVocalOrInstrumental = selectedSubmajors.value.some(item =>
+      item === 'vocal' || item === 'instrumental',
+    )
+    if (!hasVocalOrInstrumental) {
+      errors.value.submajors = '音乐类必须选择声乐或器乐'
+    }
+  }
+
+  // Validate scores
+  if (scores.value.unified) {
+    const unifiedScore = Number(scores.value.unified)
+    if (Number.isNaN(unifiedScore) || unifiedScore < 0 || unifiedScore > 300) {
+      errors.value.scores.unified = '统考成绩必须在0-300之间'
+    }
+  }
+
+  if (scores.value.culture) {
+    const cultureScore = Number(scores.value.culture)
+    const maxCultureScore = majorCategory.value === 'sports' ? 150 : 300
+    if (Number.isNaN(cultureScore) || cultureScore < 0 || cultureScore > maxCultureScore) {
+      errors.value.scores.culture = `文化成绩必须在0-${maxCultureScore}之间`
+    }
+  }
+
+  if (scores.value.chinese) {
+    const chineseScore = Number(scores.value.chinese)
+    if (Number.isNaN(chineseScore) || chineseScore < 0 || chineseScore > 150) {
+      errors.value.scores.chinese = '语文成绩必须在0-150之间'
+    }
+  }
+
+  if (scores.value.english) {
+    const englishScore = Number(scores.value.english)
+    if (Number.isNaN(englishScore) || englishScore < 0 || englishScore > 150) {
+      errors.value.scores.english = '英语成绩必须在0-150之间'
+    }
+  }
+
+  // Return true if no errors
+  return Object.values(errors.value).every(error =>
+    (typeof error === 'string' && error === '')
+    || (typeof error === 'object' && Object.values(error).every(subError => subError === '')),
+  )
+}
+
+// Form submission
+function handleSubmit() {
+  if (validateForm()) {
+    // Form is valid, submit data
+    console.log('Form submitted:', {
+      examType: examType.value,
+      selectedElectives: selectedElectives.value,
+      majorCategory: majorCategory.value,
+      selectedSubmajors: selectedSubmajors.value,
+      scores: scores.value,
+    })
+    console.log('表单提交成功！')
+  }
+}
+
+// Carousel images
+const carouselImages = [
+  {
+    id: 1,
+    imageUrl: 'https://mp-7a4eecb1-2a04-4d36-b050-1c4a78cc31a4.cdn.bspapp.com/images/web-bakground/20250619212930.png',
+    linkUrl: '/simulate',
+    altText: '艺术考生',
+  },
+  {
+    id: 2,
+    imageUrl: 'https://mp-7a4eecb1-2a04-4d36-b050-1c4a78cc31a4.cdn.bspapp.com/images/web-bakground/20250619212921.jpg',
+    linkUrl: '/universities',
+    altText: '体育考生',
+  },
+]
+
+// Carousel state
+const currentSlide = ref(0)
+let carouselInterval: any
+
+// Auto-play carousel
+function startCarousel() {
+  carouselInterval = setInterval(() => {
+    currentSlide.value = (currentSlide.value + 1) % carouselImages.length
+  }, 5000)
+}
+
+function stopCarousel() {
+  if (carouselInterval) {
+    clearInterval(carouselInterval)
+  }
+}
+
+// Navigation to previous slide
+function prevSlide() {
+  stopCarousel()
+  currentSlide.value = (currentSlide.value - 1 + carouselImages.length) % carouselImages.length
+  startCarousel()
+}
+
+// Navigation to next slide
+function nextSlide() {
+  stopCarousel()
+  currentSlide.value = (currentSlide.value + 1) % carouselImages.length
+  startCarousel()
+}
+
+// Navigation to specific slide
+function goToSlide(index: number) {
+  stopCarousel()
+  currentSlide.value = index
+  startCarousel()
+}
+
+// Start carousel on mount
+onMounted(() => {
+  startCarousel()
+})
+
+// Cleanup on unmount
+onUnmounted(() => {
+  stopCarousel()
+})
 </script>
 
 <template>
-  <div class="w-full flex flex-col">
-    <!-- Hero Section -->
-    <div class="relative overflow-hidden from-blue-600 to-indigo-800 bg-gradient-to-br text-white dark:from-blue-900 dark:to-indigo-950">
-      <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')] bg-cover bg-center opacity-20" />
-      <div class="relative z-10 mx-auto max-w-7xl px-4 py-24 lg:px-8 lg:py-32 sm:px-6">
-        <div class="mx-auto max-w-3xl text-center">
-          <h1 class="mb-6 animate-fade-in-up text-4xl font-bold tracking-tight lg:text-6xl sm:text-5xl">
-            艺体志愿宝
-          </h1>
-          <p class="mx-auto mb-10 max-w-2xl animate-fade-in-up text-xl text-blue-100 leading-relaxed delay-100 sm:text-2xl">
-            专业的艺术体育类志愿填报辅助平台，助你圆梦理想大学
-          </p>
-          <div class="flex flex-col animate-fade-in-up justify-center gap-4 delay-200 sm:flex-row">
-            <button
-              class="transform border-2 border-white rounded-full bg-white px-8 py-4 text-lg text-blue-600 font-bold shadow-lg transition-all hover:bg-blue-50 hover:shadow-xl hover:-translate-y-1"
-              @click="$router.push('/simulate')"
-            >
-              开始模拟填志愿
-            </button>
-            <button
-              class="border-2 border-white rounded-full bg-transparent px-8 py-4 text-lg text-white font-bold backdrop-blur-sm transition-all hover:bg-white/10"
-              @click="$router.push('/universities')"
-            >
-              查找理想大学
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Decorative shapes -->
-      <div class="clip-path-slant absolute bottom-0 left-0 right-0 h-16 bg-gray-50 dark:bg-gray-900" />
-    </div>
-
-    <!-- Stats Section -->
-    <div class="relative z-20 mx-auto mb-16 max-w-7xl px-4 -mt-12 lg:px-8 sm:px-6">
-      <div class="grid grid-cols-1 gap-6 rounded-2xl bg-white p-8 shadow-xl md:grid-cols-3 dark:bg-gray-800">
-        <div class="border-b border-gray-100 p-4 text-center md:border-b-0 md:border-r dark:border-gray-700">
-          <div class="mb-2 text-4xl text-blue-600 font-bold dark:text-blue-400">
-            2000+
-          </div>
-          <div class="text-gray-600 dark:text-gray-300">
-            收录院校
-          </div>
-        </div>
-        <div class="border-b border-gray-100 p-4 text-center md:border-b-0 md:border-r dark:border-gray-700">
-          <div class="mb-2 text-4xl text-blue-600 font-bold dark:text-blue-400">
-            5万+
-          </div>
-          <div class="text-gray-600 dark:text-gray-300">
-            历年数据
-          </div>
-        </div>
-        <div class="p-4 text-center">
-          <div class="mb-2 text-4xl text-blue-600 font-bold dark:text-blue-400">
-            98%
-          </div>
-          <div class="text-gray-600 dark:text-gray-300">
-            录取参考率
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Features Section -->
-    <div class="mx-auto max-w-7xl px-4 py-16 lg:px-8 sm:px-6">
-      <div class="mb-16 text-center">
-        <h2 class="mb-4 text-3xl text-gray-900 font-bold dark:text-white">
-          核心功能
-        </h2>
-        <p class="mx-auto max-w-2xl text-xl text-gray-600 dark:text-gray-300">
-          全方位的数据支持，智能化的推荐算法，为你的升学之路保驾护航
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
-        <!-- Feature 1 -->
-        <div class="group border border-gray-100 rounded-2xl bg-white p-8 shadow-lg transition-all duration-300 dark:border-gray-700 dark:bg-gray-800 hover:shadow-xl">
-          <div class="mb-6 h-16 w-16 flex items-center justify-center rounded-2xl bg-blue-100 text-4xl transition-transform duration-300 group-hover:scale-110 dark:bg-blue-900/30">
-            🎯
-          </div>
-          <h3 class="mb-3 text-xl text-gray-900 font-bold dark:text-white">
-            智能匹配
-          </h3>
-          <p class="text-gray-600 leading-relaxed dark:text-gray-400">
-            根据你的文化课成绩和专业课成绩，结合历年录取数据，智能匹配最适合你的大学和专业，降低滑档风险。
-          </p>
-        </div>
-
-        <!-- Feature 2 -->
-        <div class="group border border-gray-100 rounded-2xl bg-white p-8 shadow-lg transition-all duration-300 dark:border-gray-700 dark:bg-gray-800 hover:shadow-xl">
-          <div class="mb-6 h-16 w-16 flex items-center justify-center rounded-2xl bg-green-100 text-4xl transition-transform duration-300 group-hover:scale-110 dark:bg-green-900/30">
-            📊
-          </div>
-          <h3 class="mb-3 text-xl text-gray-900 font-bold dark:text-white">
-            数据准确
-          </h3>
-          <p class="text-gray-600 leading-relaxed dark:text-gray-400">
-            实时更新全国各大艺术体育类院校的最新招生简章、录取分数线和招生计划，确保每一条信息都准确可靠。
-          </p>
-        </div>
-
-        <!-- Feature 3 -->
-        <div class="group border border-gray-100 rounded-2xl bg-white p-8 shadow-lg transition-all duration-300 dark:border-gray-700 dark:bg-gray-800 hover:shadow-xl">
-          <div class="mb-6 h-16 w-16 flex items-center justify-center rounded-2xl bg-purple-100 text-4xl transition-transform duration-300 group-hover:scale-110 dark:bg-purple-900/30">
-            💡
-          </div>
-          <h3 class="mb-3 text-xl text-gray-900 font-bold dark:text-white">
-            专业指导
-          </h3>
-          <p class="text-gray-600 leading-relaxed dark:text-gray-400">
-            提供详细的志愿填报规则解读和技巧分享，更有专家团队在线答疑，帮你做出最优的升学选择。
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Content Block -->
-    <div class="bg-gray-50 py-16 dark:bg-gray-800/50">
-      <div class="mx-auto max-w-7xl px-4 lg:px-8 sm:px-6">
-        <div class="flex flex-col items-center gap-12 lg:flex-row">
-          <div class="w-full lg:w-1/2">
-            <div class="relative overflow-hidden rounded-2xl shadow-2xl">
-              <img
-                src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                alt="Art student"
-                class="h-auto w-full object-cover transition-transform duration-700 hover:scale-105"
+  <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8 sm:px-6">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-10">
+      <!-- Left Carousel (70% width on lg) -->
+      <div class="lg:col-span-7">
+        <div class="relative overflow-hidden rounded-2xl bg-white shadow-xl">
+          <div class="relative aspect-video overflow-hidden">
+            <!-- Carousel images -->
+            <transition-group name="fade" tag="div">
+              <div
+                v-for="(image, index) in carouselImages"
+                v-show="index === currentSlide"
+                :key="image.id"
+                class="absolute inset-0"
               >
-              <div class="absolute inset-0 flex items-end from-black/60 to-transparent bg-gradient-to-t p-8">
-                <div class="text-white">
-                  <p class="text-lg font-bold">
-                    专注艺考升学
-                  </p>
-                  <p class="text-sm opacity-80">
-                    为梦想插上翅膀
-                  </p>
-                </div>
+                <a :href="image.linkUrl" class="block h-full w-full">
+                  <img
+                    :src="image.imageUrl"
+                    :alt="image.altText"
+                    class="h-full w-full object-cover"
+                  >
+                </a>
               </div>
-            </div>
+            </transition-group>
           </div>
-          <div class="w-full lg:w-1/2">
-            <h2 class="mb-6 text-3xl text-gray-900 font-bold dark:text-white">
-              为什么选择艺体志愿宝？
-            </h2>
-            <div class="space-y-6">
-              <div class="flex items-start">
-                <div class="h-10 w-10 flex flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 font-bold dark:bg-blue-900/50 dark:text-blue-400">
-                  1
-                </div>
-                <div class="ml-4">
-                  <h4 class="text-lg text-gray-900 font-semibold dark:text-white">
-                    针对性强
-                  </h4>
-                  <p class="mt-1 text-gray-600 dark:text-gray-400">
-                    专为艺术体育生打造，算法模型考虑了艺体类特殊的录取规则（综合分计算等）。
-                  </p>
-                </div>
-              </div>
-              <div class="flex items-start">
-                <div class="h-10 w-10 flex flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 font-bold dark:bg-blue-900/50 dark:text-blue-400">
-                  2
-                </div>
-                <div class="ml-4">
-                  <h4 class="text-lg text-gray-900 font-semibold dark:text-white">
-                    覆盖面广
-                  </h4>
-                  <p class="mt-1 text-gray-600 dark:text-gray-400">
-                    涵盖美术、音乐、舞蹈、表演、体育等多个细分专业方向。
-                  </p>
-                </div>
-              </div>
-              <div class="flex items-start">
-                <div class="h-10 w-10 flex flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 font-bold dark:bg-blue-900/50 dark:text-blue-400">
-                  3
-                </div>
-                <div class="ml-4">
-                  <h4 class="text-lg text-gray-900 font-semibold dark:text-white">
-                    使用便捷
-                  </h4>
-                  <p class="mt-1 text-gray-600 dark:text-gray-400">
-                    界面简洁直观，操作简单，手机端/电脑端完美适配。
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div class="mt-8">
-              <button class="flex items-center gap-2 text-blue-600 font-semibold transition-colors dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300" @click="$router.push('/about')">
-                了解更多关于我们要做的 <span class="text-xl">→</span>
+
+          <!-- Carousel navigation -->
+          <div class="absolute bottom-4 left-1/2 flex transform -translate-x-1/2 space-x-2">
+            <button
+              v-for="(image, index) in carouselImages"
+              :key="image.id"
+              class="h-3 w-3 rounded-full bg-white/70 hover:bg-white focus:outline-none"
+              :class="index === currentSlide ? 'opacity-100' : 'opacity-50'"
+              @click="goToSlide(index)"
+            >
+              <span class="sr-only">Slide {{ index + 1 }}</span>
+            </button>
+          </div>
+
+          <!-- Previous/Next buttons -->
+          <button
+            class="absolute left-4 top-1/2 transform rounded-full bg-white/50 p-2 text-gray-800 -translate-y-1/2 hover:bg-white focus:outline-none"
+            @click="prevSlide"
+          >
+            <span class="sr-only">Previous</span>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          <button
+            class="absolute right-4 top-1/2 transform rounded-full bg-white/50 p-2 text-gray-800 -translate-y-1/2 hover:bg-white focus:outline-none"
+            @click="nextSlide"
+          >
+            <span class="sr-only">Next</span>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Form (30% width on lg) -->
+      <div class="lg:col-span-3">
+        <div class="rounded-2xl bg-white p-6 shadow-xl">
+          <h2 class="mb-6 text-2xl text-gray-900 font-bold">
+            志愿填报助手
+          </h2>
+
+          <!-- Show different content based on login status -->
+          <div v-if="!userStore.user">
+            <div class="mb-4 text-center">
+              <p class="mb-4 text-gray-600">
+                请先登录，开始志愿填报
+              </p>
+              <button
+                class="w-full rounded-full bg-blue-600 px-6 py-3 text-lg text-white font-semibold shadow-lg transition-colors hover:bg-blue-700 hover:shadow-xl"
+                @click="$router.push('/login')"
+              >
+                登录
               </button>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Call to Action -->
-    <div class="bg-blue-600 px-4 py-16 dark:bg-blue-800">
-      <div class="mx-auto max-w-4xl text-center text-white">
-        <h2 class="mb-6 text-3xl font-bold md:text-4xl">
-          准备好开启你的大学之旅了吗？
-        </h2>
-        <p class="mx-auto mb-8 max-w-2xl text-lg text-blue-100">
-          立即注册账号，免费获取你的个性化志愿填报方案。
-        </p>
-        <button
-          class="rounded-full bg-white px-10 py-4 text-lg text-blue-600 font-bold shadow-lg transition-all hover:bg-blue-50 hover:shadow-xl"
-          @click="$router.push('/simulate')"
-        >
-          立即体验
-        </button>
+          <div v-else>
+            <!-- Exam Type -->
+            <div class="mb-6">
+              <label class="mb-2 block text-sm text-gray-700 font-medium">考试类型</label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2">
+                  <input
+                    v-model="examType"
+                    type="radio"
+                    value="history"
+                    class="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                  >
+                  <span class="text-gray-700">历史组</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input
+                    v-model="examType"
+                    type="radio"
+                    value="physics"
+                    class="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                  >
+                  <span class="text-gray-700">物理组</span>
+                </label>
+              </div>
+              <div v-if="errors.examType" class="mt-2 text-sm text-red-600">
+                {{ errors.examType }}
+              </div>
+            </div>
+
+            <!-- Elective Subjects (4选2) -->
+            <div class="mb-6">
+              <label class="mb-2 block text-sm text-gray-700 font-medium">选考科目</label>
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  v-for="option in electiveOptions"
+                  :key="option.value"
+                  class="border rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+                  :class="selectedElectives.includes(option.value)
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'"
+                  @click="handleElectiveChange(option.value)"
+                >
+                  {{ option.label }}
+                </button>
+              </div>
+              <div v-if="errors.electives" class="mt-2 text-sm text-red-600">
+                {{ errors.electives }}
+              </div>
+            </div>
+
+            <!-- Major Category -->
+            <div class="mb-6">
+              <label class="mb-2 block text-sm text-gray-700 font-medium">专业类别</label>
+              <select
+                v-model="majorCategory"
+                class="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">
+                  请选择
+                </option>
+                <option v-for="option in majorCategoryOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+              <div v-if="errors.majorCategory" class="mt-2 text-sm text-red-600">
+                {{ errors.majorCategory }}
+              </div>
+            </div>
+
+            <!-- Sub-major Category (条件显示) -->
+            <div v-if="majorCategory === 'performance' || majorCategory === 'music'" class="mb-6">
+              <label class="mb-2 block text-sm text-gray-700 font-medium">
+                {{ majorCategory === 'performance' ? '表演类' : '音乐类' }}专业选课
+              </label>
+              <div class="grid grid-cols-1 gap-2">
+                <button
+                  v-for="option in getSubmajorOptions()"
+                  :key="option.value"
+                  class="border rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+                  :class="selectedSubmajors.includes(option.value)
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'"
+                  @click="handleSubmajorChange(option.value)"
+                >
+                  {{ option.label }}
+                </button>
+              </div>
+              <div v-if="errors.submajors" class="mt-2 text-sm text-red-600">
+                {{ errors.submajors }}
+              </div>
+            </div>
+
+            <!-- Scores Section -->
+            <div class="mb-6">
+              <h3 class="mb-3 text-sm text-gray-700 font-semibold">
+                成绩输入
+              </h3>
+
+              <!-- Unified Exam Score -->
+              <div class="mb-4">
+                <label class="mb-2 block text-sm text-gray-700 font-medium">
+                  {{ majorCategory === 'music' ? '主项成绩' : '统考成绩' }}
+                </label>
+                <input
+                  v-model="scores.unified"
+                  type="number"
+                  min="0"
+                  max="300"
+                  placeholder="0-300"
+                  class="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                <div v-if="errors.scores.unified" class="mt-2 text-sm text-red-600">
+                  {{ errors.scores.unified }}
+                </div>
+              </div>
+
+              <!-- Culture Score -->
+              <div class="mb-4">
+                <label class="mb-2 block text-sm text-gray-700 font-medium">文化成绩</label>
+                <input
+                  v-model="scores.culture"
+                  type="number"
+                  min="0"
+                  :max="majorCategory === 'sports' ? 150 : 300"
+                  placeholder="0-{{ majorCategory === 'sports' ? 150 : 300 }}"
+                  class="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                <div v-if="errors.scores.culture" class="mt-2 text-sm text-red-600">
+                  {{ errors.scores.culture }}
+                </div>
+              </div>
+
+              <!-- Chinese & English Scores -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="mb-2 block text-sm text-gray-700 font-medium">语文成绩</label>
+                  <input
+                    v-model="scores.chinese"
+                    type="number"
+                    min="0"
+                    max="150"
+                    placeholder="0-150"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                  <div v-if="errors.scores.chinese" class="mt-2 text-sm text-red-600">
+                    {{ errors.scores.chinese }}
+                  </div>
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm text-gray-700 font-medium">英语成绩</label>
+                  <input
+                    v-model="scores.english"
+                    type="number"
+                    min="0"
+                    max="150"
+                    placeholder="0-150"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                  <div v-if="errors.scores.english" class="mt-2 text-sm text-red-600">
+                    {{ errors.scores.english }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+              class="w-full rounded-full bg-blue-600 px-6 py-3 text-lg text-white font-semibold shadow-lg transition-colors hover:bg-blue-700 hover:shadow-xl"
+              @click="handleSubmit"
+            >
+              确认
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
+
 <route lang="yaml">
 meta:
   layout: home
 </route>
-
-<style scoped>
-.clip-path-slant {
-  clip-path: polygon(0 100%, 100% 100%, 100% 0);
-}
-</style>

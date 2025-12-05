@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useWindowScroll } from '@vueuse/core'
 import { ref, watch } from 'vue'
 import { useUserStore } from '../stores/user'
 
@@ -78,9 +77,11 @@ function handleLogout() {
       <div class="h-16 flex items-center justify-between">
         <!-- Left-aligned system icon -->
         <div class="flex items-center">
-          <div class="text-2xl text-blue-600 dark:text-blue-400">
-            🎨
-          </div>
+          <img
+            src="https://yitisheng.vip/assets/logo.0e7b79fc.png"
+            alt="艺体志愿宝logo"
+            class="h-8 w-auto"
+          >
         </div>
 
         <!-- Middle navigation tabs -->
