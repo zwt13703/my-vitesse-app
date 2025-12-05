@@ -1,5 +1,3 @@
-import { resolve } from 'node:path'
-
 export default {
   content: [
     './index.html',

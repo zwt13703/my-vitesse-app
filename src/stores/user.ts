@@ -10,7 +10,7 @@ export const useUserStore = defineStore('user', () => {
    * Current logged-in user.
    */
   const user = ref<User | null>(null)
-  
+
   // Initialize user from localStorage
   if (typeof window !== 'undefined') {
     const savedUser = localStorage.getItem('user')
@@ -38,7 +38,7 @@ export const useUserStore = defineStore('user', () => {
     user.value = null
     localStorage.removeItem('user')
   }
-  
+
   return {
     user,
     login,

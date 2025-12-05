@@ -7,4 +7,9 @@ export default antfu(
     formatters: true,
     pnpm: true,
   },
+  {
+    rules: {
+      'unicorn/no-instanceof-builtins': 'off',
+    },
+  },
 )

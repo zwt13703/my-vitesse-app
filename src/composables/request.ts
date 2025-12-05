@@ -19,7 +19,7 @@ export interface RequestResponse<T = any> {
 }
 
 // 创建请求方法
-const request = async <T = any>(config: RequestConfig): Promise<T> => {
+async function request<T = any>(config: RequestConfig): Promise<T> {
   const {
     url,
     baseURL = import.meta.env.VITE_API_BASE_URL || '',
@@ -33,7 +33,8 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
   let fullUrl = ''
   if (url?.startsWith('http')) {
     fullUrl = url
-  } else {
+  }
+  else {
     fullUrl = baseURL + (url || '')
   }
 
@@ -59,7 +60,7 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
   try {
     // 发送请求
     const response = await fetch(fullUrl, init)
-    
+
     // 检查响应状态
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -78,14 +79,16 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
 
     if (code === 200) {
       return data
-    } else {
+    }
+    else {
       // 统一处理错误信息
       if (showError) {
         console.error('Request error:', message)
       }
       throw new Error(message || 'Request failed')
     }
-  } catch (error) {
+  }
+  catch (error) {
     // 隐藏加载动画
     if (showLoading) {
       // 隐藏加载动画
@@ -101,7 +104,7 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
 }
 
 // 封装GET请求
-const get = <T = any>(url: string, params?: Record<string, any>, config?: Omit<RequestConfig, 'url' | 'method' | 'params'>): Promise<T> => {
+function get<T = any>(url: string, params?: Record<string, any>, config?: Omit<RequestConfig, 'url' | 'method' | 'params'>): Promise<T> {
   return request<T>({
     method: 'GET',
     url,
@@ -111,7 +114,7 @@ const get = <T = any>(url: string, params?: Record<string, any>, config?: Omit<R
 }
 
 // 封装POST请求
-const post = <T = any>(url: string, data?: any, config?: Omit<RequestConfig, 'url' | 'method' | 'body'>): Promise<T> => {
+function post<T = any>(url: string, data?: any, config?: Omit<RequestConfig, 'url' | 'method' | 'body'>): Promise<T> {
   return request<T>({
     method: 'POST',
     url,
@@ -125,7 +128,7 @@ const post = <T = any>(url: string, data?: any, config?: Omit<RequestConfig, 'ur
 }
 
 // 封装PUT请求
-const put = <T = any>(url: string, data?: any, config?: Omit<RequestConfig, 'url' | 'method' | 'body'>): Promise<T> => {
+function put<T = any>(url: string, data?: any, config?: Omit<RequestConfig, 'url' | 'method' | 'body'>): Promise<T> {
   return request<T>({
     method: 'PUT',
     url,
@@ -139,7 +142,7 @@ const put = <T = any>(url: string, data?: any, config?: Omit<RequestConfig, 'url
 }
 
 // 封装DELETE请求
-const del = <T = any>(url: string, config?: Omit<RequestConfig, 'url' | 'method'>): Promise<T> => {
+function del<T = any>(url: string, config?: Omit<RequestConfig, 'url' | 'method'>): Promise<T> {
   return request<T>({
     method: 'DELETE',
     url,
@@ -164,19 +167,19 @@ class CancelToken {
   }
 }
 
-const createCancelToken = () => {
+function createCancelToken() {
   return new CancelToken()
 }
 
 // 导出所有方法
 export {
-  request,
+  CancelToken,
+  createCancelToken,
+  del,
   get,
   post,
   put,
-  del,
-  CancelToken,
-  createCancelToken,
+  request,
 }
 
 // 默认导出
