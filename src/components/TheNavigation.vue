@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useUserStore } from '../stores/user'
 
 const userStore = useUserStore()
@@ -7,11 +8,34 @@ const isLoginModalOpen = ref(false)
 const username = ref('')
 const password = ref('')
 const error = ref('')
+const route = useRoute()
+
+const routerLinkList = [
+  {
+    path: '/',
+    name: 'home',
+    label: '首页',
+  },
+  {
+    path: '/simulate',
+    name: 'simulate',
+    label: '模拟填志愿',
+  },
+  {
+    path: '/universities',
+    name: 'universities',
+    label: '找大学',
+  },
+  {
+    path: '/majors',
+    name: 'majors',
+    label: '找专业',
+  },
+] as const
 
 // Scroll handling
 const { y } = useWindowScroll()
 const isVisible = ref(true)
-
 watch(y, (newY, oldY) => {
   // Always show at the very top
   if (newY <= 0) {
@@ -83,32 +107,17 @@ function handleLogout() {
             class="h-8 w-auto"
           >
         </div>
-
         <!-- Middle navigation tabs -->
         <div class="flex items-center space-x-8">
           <router-link
-            to="/"
-            class="rounded-md px-3 py-2 text-sm text-gray-700 font-medium transition-colors dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
+            v-for="item in routerLinkList"
+            :id="item.name"
+            :key="item.name"
+            :to="item.path"
+            class="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+            :class="{ 'text-blue-600 dark:text-blue-400': route.path === item.path, 'text-gray-700 dark:text-gray-200': route.path !== item.path }"
           >
-            首页
-          </router-link>
-          <router-link
-            to="/simulate"
-            class="rounded-md px-3 py-2 text-sm text-gray-700 font-medium transition-colors dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
-          >
-            模拟填志愿
-          </router-link>
-          <router-link
-            to="/universities"
-            class="rounded-md px-3 py-2 text-sm text-gray-700 font-medium transition-colors dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
-          >
-            找大学
-          </router-link>
-          <router-link
-            to="/majors"
-            class="rounded-md px-3 py-2 text-sm text-gray-700 font-medium transition-colors dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
-          >
-            查专业
+            {{ item.label }}
           </router-link>
         </div>
 
