@@ -305,6 +305,11 @@ onUnmounted(() => {
               <span class="sr-only">Slide {{ index + 1 }}</span>
             </button>
           </div>
+          <w-radio-group v-model="examType" size="small">
+            <w-radio-button value="large" label="Large" />
+            <w-radio-button value="middle" label="Middle" />
+            <w-radio-button value="small" label="Small" />
+          </w-radio-group>
 
           <!-- Previous/Next buttons -->
           <button
@@ -330,12 +335,8 @@ onUnmounted(() => {
       </div>
 
       <!-- Right Form (30% width on lg) -->
-      <div class="lg:col-span-3">
+      <div class="select-none lg:col-span-3">
         <div class="rounded-2xl bg-white p-6 shadow-xl">
-          <h2 class="mb-6 text-2xl text-gray-900 font-bold">
-            志愿填报助手
-          </h2>
-
           <!-- Show different content based on login status -->
           <div v-if="!userStore.user">
             <div class="mb-4 text-center">
