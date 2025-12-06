@@ -1,38 +1,45 @@
 {
   "cSpell.words": ["Vitesse", "Vite", "unocss", "vitest", "vueuse", "pinia", "demi", "antfu", "iconify", "intlify", "vitejs", "unplugin", "pnpm"],
-  "i18n-ally.sourceLanguage": "en",
+  "i18n-ally.sourceLanguage": "zh-CN",
   "i18n-ally.keystyle": "nested",
   "i18n-ally.localesPaths": "locales",
   "i18n-ally.sortKeys": true,
 
-  // Disable the default formatter
-  "prettier.enable": false,
-  "editor.formatOnSave": false,
-
-  // Auto fix
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit",
-    "source.organizeImports": "never"
+  // Vue 特定设置
+  "vue.server.initialization": {
+    "typescript": {
+      "enable": true
+    }
+  },
+  "vue.languageFeatures.codeActions": true,
+  "vue.languageFeatures.completion": true,
+  "vue.languageFeatures.diagnostics": true,
+  "vue.languageFeatures.hover": true,
+  "vue.languageFeatures.rename": true,
+  "vue.languageFeatures.signatureHelp": true,
+  "vue.languageFeatures.suggestions": true,
+  "vue.scaffoldSnippetSources": {
+    "workspace": "💼",
+    "user": "👤",
+    "vetur": "📦"
+  },
+  "emmet.includeLanguages": {
+    "vue-html": "html",
+    "vue": "html"
   },
 
-  // Silent the stylistic rules in you IDE, but still auto fix them
-  "eslint.rules.customizations": [
-    { "rule": "style/*", "severity": "off" },
-    { "rule": "format/*", "severity": "off" },
-    { "rule": "*-indent", "severity": "off" },
-    { "rule": "*-spacing", "severity": "off" },
-    { "rule": "*-spaces", "severity": "off" },
-    { "rule": "*-order", "severity": "off" },
-    { "rule": "*-dangle", "severity": "off" },
-    { "rule": "*-newline", "severity": "off" },
-    { "rule": "*quotes", "severity": "off" },
-    { "rule": "*semi", "severity": "off" }
-  ],
+  // JavaScript 提示
+  "javascript.suggest.autoImports": true,
+  "javascript.suggest.includeAutomaticOptionalChainCompletions": true,
+  "javascript.suggest.includeCompletionsForImportStatements": true,
+  "javascript.suggest.includePackageJsonAutoImports": "auto",
+  "typescript.suggest.autoImports": true,
 
-  // The following is optional.
-  // It's better to put under project setting `.vscode/settings.json`
-  // to avoid conflicts with working with different eslint configs
-  // that does not support all formats.
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": true
+  },
   "eslint.validate": [
     "javascript",
     "javascriptreact",
@@ -44,5 +51,8 @@
     "json",
     "jsonc",
     "yaml"
-  ]
+  ],
+  "cSpell.enabledFileTypes": {
+    "vue": false
+  }
 }

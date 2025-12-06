@@ -104,7 +104,7 @@ async function toggleLocales() {
       <div class="flex flex-col items-center justify-between border-t border-gray-100 pt-8 md:flex-row dark:border-gray-800">
         <div class="flex items-center gap-4 text-sm text-gray-400">
           <p class="text-sm text-gray-400">
-            &copy; {{ new Date().getFullYear() }} 艺体志愿宝. All rights reserved.
+            &copy; 2024-{{ new Date().getFullYear() }} 艺体志愿宝. All rights reserved.
           </p>
 
           <div class="flex items-center gap-2">
