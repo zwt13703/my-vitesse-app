@@ -8,3 +8,4 @@
 
 - **样式**: Tailwind CSS (通过 CDN 或项目依赖引入)
 - **包管理器** pnpm
+- 遵守 eslint 规则

@@ -1,7 +1,18 @@
 <script setup lang="ts">
+import type { FilterState } from '~/components/FilterBar.vue'
+
 defineOptions({
   name: 'SimulatePage',
 })
+
+const currentFilters = ref<FilterState | null>(null)
+const currentKeyword = ref('')
+
+function handleDataChange(data: { keyword: string, filters: FilterState }) {
+  console.warn('发起请求:', data.keyword, data.filters)
+  currentKeyword.value = data.keyword
+  currentFilters.value = data.filters
+}
 
 useHead({
   title: '模拟填志愿',
@@ -16,20 +27,12 @@ useHead({
       </h1>
 
       <div class="rounded-lg bg-white p-6 shadow-md">
-        <div class="py-8 text-center">
-          <div class="mb-4 text-6xl">
-            🎓
-          </div>
-          <h2 class="mb-2 text-xl text-gray-900 font-semibold">
-            志愿填报模拟系统
-          </h2>
-          <p class="mb-4 text-gray-600">
-            在这里你可以根据自己的成绩和偏好模拟填报志愿
-          </p>
-          <div class="mt-8">
-            <button class="rounded-md bg-blue-600 px-6 py-3 text-lg text-white font-medium transition-colors hover:bg-blue-700">
-              开始模拟
-            </button>
+        <div class="min-h-screen bg-gray-50 p-10">
+          <FilterBar @change="handleDataChange" />
+          <!-- 用于演示结果 -->
+          <div class="mt-8 border border-gray-300 rounded border-dashed p-4">
+            <p>当前筛选条件: {{ JSON.stringify(currentFilters) }}</p>
+            <p>当前搜索词: {{ currentKeyword }}</p>
           </div>
         </div>
       </div>
