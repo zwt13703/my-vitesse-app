@@ -12,17 +12,17 @@ useHead({
 const userStore = useUserStore()
 
 // Form state
-const examType = ref('history') // 默认选中历史组
+const examType = ref('历史组') // 默认选中历史组
 const selectedElectives = ref<string[]>([]) // 选考科目，最多2项
 const majorCategory = ref('') // 专业类别
-const selectedSubmajors = ref<string[]>([]) // 专业选课
+const selectedSubMajors = ref<string[]>([]) // 专业选课
 
 // Form validation
 const errors = ref({
   examType: '',
   electives: '',
   majorCategory: '',
-  submajors: '',
+  subMajors: '',
   scores: {
     unified: '',
     culture: '',
@@ -41,38 +41,38 @@ const scores = ref({
 
 // Elective options (4选2)
 const electiveOptions = [
-  { label: '地理', value: 'geography' },
-  { label: '政治', value: 'politics' },
-  { label: '化学', value: 'chemistry' },
-  { label: '生物', value: 'biology' },
+  { label: '地理', value: '地理' },
+  { label: '政治', value: '政治' },
+  { label: '化学', value: '化学' },
+  { label: '生物', value: '生物' },
 ]
 
 // Major category options
 const majorCategoryOptions = [
-  { label: '美术与设计类', value: 'art_design' },
-  { label: '播音与主持类', value: 'broadcasting' },
-  { label: '表演类', value: 'performance' },
-  { label: '音乐类', value: 'music' },
-  { label: '舞蹈类', value: 'dance' },
-  { label: '书法类', value: 'calligraphy' },
-  { label: '戏曲类', value: 'opera' },
-  { label: '体育类', value: 'sports' },
+  { label: '美术与设计类', value: '美术与设计类' },
+  { label: '播音与主持类', value: '播音与主持类' },
+  { label: '表演类', value: '表演类' },
+  { label: '音乐类', value: '音乐类' },
+  { label: '舞蹈类', value: '舞蹈类' },
+  { label: '书法类', value: '书法类' },
+  { label: '戏曲类', value: '戏曲类' },
+  { label: '体育类', value: '体育类' },
 ]
 
 // Sub-major options based on major category
-function getSubmajorOptions() {
+function getSubMajorOptions() {
   switch (majorCategory.value) {
-    case 'performance':
+    case '表演类':
       return [
-        { label: '服装表演', value: 'fashion' },
-        { label: '戏剧影视导演', value: 'film_director' },
-        { label: '戏剧影视表演', value: 'film_performance' },
+        { label: '服装表演', value: '服装表演' },
+        { label: '戏剧影视导演', value: '戏剧影视导演' },
+        { label: '戏剧影视表演', value: '戏剧影视表演' },
       ]
-    case 'music':
+    case '音乐类':
       return [
-        { label: '音乐表演声乐', value: 'vocal' },
-        { label: '音乐表演器乐', value: 'instrumental' },
-        { label: '音乐教育', value: 'music_education' },
+        { label: '音乐表演声乐', value: '音乐表演声乐', disabled: selectedSubMajors.value.includes('音乐表演器乐') },
+        { label: '音乐表演器乐', value: '音乐表演器乐', disabled: selectedSubMajors.value.includes('音乐表演声乐') },
+        { label: '音乐教育', value: '音乐教育' },
       ]
     default:
       return []
@@ -93,17 +93,26 @@ function handleElectiveChange(value: string) {
   validateForm()
 }
 
-// Handle sub-major selection
-function handleSubmajorChange(value: string) {
-  const index = selectedSubmajors.value.indexOf(value)
-  if (index === -1) {
-    selectedSubmajors.value.push(value)
-  }
-  else {
-    selectedSubmajors.value.splice(index, 1)
-  }
-  validateForm()
+function handleMajorCategoryChange(val: any) {
+  console.debug('handleMajorCategoryChange', val)
+  majorCategory.value = val
+  selectedSubMajors.value = [] // 清空专业选课
 }
+
+// Handle sub-major selection
+function handleSubMajorChange(val: any) {
+  console.debug('handleSubMajorChange', val)
+}
+// function handleSubMajorChange(value: string) {
+//   const index = selectedSubMajors.value.indexOf(value)
+//   if (index === -1) {
+//     selectedSubMajors.value.push(value)
+//   }
+//   else {
+//     selectedSubMajors.value.splice(index, 1)
+//   }
+//   validateForm()
+// }
 
 // Validate form
 function validateForm() {
@@ -112,7 +121,7 @@ function validateForm() {
     examType: '',
     electives: '',
     majorCategory: '',
-    submajors: '',
+    subMajors: '',
     scores: {
       unified: '',
       culture: '',
@@ -136,17 +145,17 @@ function validateForm() {
     errors.value.majorCategory = '请选择专业类别'
   }
 
-  // Validate submajors based on major category
+  // Validate subMajors based on major category
   if (majorCategory.value === 'performance') {
     // No specific minimum mentioned
   }
   else if (majorCategory.value === 'music') {
     // Must choose at least one of vocal or instrumental
-    const hasVocalOrInstrumental = selectedSubmajors.value.some(item =>
+    const hasVocalOrInstrumental = selectedSubMajors.value.some(item =>
       item === 'vocal' || item === 'instrumental',
     )
     if (!hasVocalOrInstrumental) {
-      errors.value.submajors = '音乐类必须选择声乐或器乐'
+      errors.value.subMajors = '音乐类必须选择声乐或器乐'
     }
   }
 
@@ -195,7 +204,7 @@ function handleSubmit() {
       examType: examType.value,
       selectedElectives: selectedElectives.value,
       majorCategory: majorCategory.value,
-      selectedSubmajors: selectedSubmajors.value,
+      selectedSubMajors: selectedSubMajors.value,
       scores: scores.value,
     })
     console.log('表单提交成功！')
@@ -305,12 +314,6 @@ onUnmounted(() => {
               <span class="sr-only">Slide {{ index + 1 }}</span>
             </button>
           </div>
-          <w-radio-group v-model="examType" size="small">
-            <w-radio-button value="large" label="Large" />
-            <w-radio-button value="middle" label="Middle" />
-            <w-radio-button value="small" label="Small" />
-          </w-radio-group>
-
           <!-- Previous/Next buttons -->
           <button
             class="absolute left-4 top-1/2 transform rounded-full bg-white/50 p-2 text-gray-800 -translate-y-1/2 hover:bg-white focus:outline-none"
@@ -336,7 +339,7 @@ onUnmounted(() => {
 
       <!-- Right Form (30% width on lg) -->
       <div class="select-none lg:col-span-3">
-        <div class="rounded-2xl bg-white p-6 shadow-xl">
+        <div class="rounded-2xl bg-white p-6 text-gray-700 shadow-xl dark:border-gray-700 dark:bg-gray-800 dark:text-white">
           <!-- Show different content based on login status -->
           <div v-if="!userStore.user">
             <div class="mb-4 text-center">
@@ -353,37 +356,18 @@ onUnmounted(() => {
           </div>
 
           <div v-else>
-            <!-- Exam Type -->
             <div class="mb-6">
-              <label class="mb-2 block text-sm text-gray-700 font-medium">考试类型</label>
+              <label class="mb-2 block text-sm font-medium">考试类型</label>
               <div class="flex gap-4">
-                <label class="flex items-center gap-2">
-                  <input
-                    v-model="examType"
-                    type="radio"
-                    value="history"
-                    class="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                  >
-                  <span class="text-gray-700">历史组</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input
-                    v-model="examType"
-                    type="radio"
-                    value="physics"
-                    class="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                  >
-                  <span class="text-gray-700">物理组</span>
-                </label>
-              </div>
-              <div v-if="errors.examType" class="mt-2 text-sm text-red-600">
-                {{ errors.examType }}
+                <w-radio-group v-model="examType" size="small">
+                  <w-radio-button value="历史组" label="历史组" />
+                  <w-radio-button value="物理组" label="物理组" />
+                </w-radio-group>
               </div>
             </div>
-
             <!-- Elective Subjects (4选2) -->
             <div class="mb-6">
-              <label class="mb-2 block text-sm text-gray-700 font-medium">选考科目</label>
+              <label class="mb-2 block text-sm font-medium">选考科目</label>
               <div class="grid grid-cols-2 gap-2">
                 <button
                   v-for="option in electiveOptions"
@@ -391,7 +375,7 @@ onUnmounted(() => {
                   class="border rounded-lg px-4 py-2 text-sm font-medium transition-colors"
                   :class="selectedElectives.includes(option.value)
                     ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'"
+                    : 'bg-gray-50 border-gray-300 hover:bg-gray-100'"
                   @click="handleElectiveChange(option.value)"
                 >
                   {{ option.label }}
@@ -404,64 +388,59 @@ onUnmounted(() => {
 
             <!-- Major Category -->
             <div class="mb-6">
-              <label class="mb-2 block text-sm text-gray-700 font-medium">专业类别</label>
-              <select
-                v-model="majorCategory"
-                class="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">
-                  请选择
-                </option>
-                <option v-for="option in majorCategoryOptions" :key="option.value" :value="option.value">
-                  {{ option.label }}
-                </option>
-              </select>
+              <label class="mb-2 block text-sm font-medium">专业类别</label>
+              <div class="flex" gap-4>
+                <w-select
+                  v-model:value="majorCategory"
+                  placeholder="请选择专业类别"
+                  :options="majorCategoryOptions"
+                  @change="handleMajorCategoryChange"
+                />
+              </div>
               <div v-if="errors.majorCategory" class="mt-2 text-sm text-red-600">
                 {{ errors.majorCategory }}
               </div>
             </div>
 
             <!-- Sub-major Category (条件显示) -->
-            <div v-if="majorCategory === 'performance' || majorCategory === 'music'" class="mb-6">
-              <label class="mb-2 block text-sm text-gray-700 font-medium">
-                {{ majorCategory === 'performance' ? '表演类' : '音乐类' }}专业选课
+            <div v-if="majorCategory === '表演类' || majorCategory === '音乐类'" class="mb-6">
+              <label class="mb-2 block text-sm font-medium">
+                {{ majorCategory === '表演类' ? '表演类' : '音乐类' }}专业选课
               </label>
-              <div class="grid grid-cols-1 gap-2">
-                <button
-                  v-for="option in getSubmajorOptions()"
-                  :key="option.value"
-                  class="border rounded-lg px-4 py-2 text-sm font-medium transition-colors"
-                  :class="selectedSubmajors.includes(option.value)
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'"
-                  @click="handleSubmajorChange(option.value)"
-                >
-                  {{ option.label }}
-                </button>
+              <div class="flex gap-4">
+                <w-select
+                  v-model:value="selectedSubMajors"
+                  mode="multiple"
+                  placeholder="请选择技术栈..."
+                  :max-tag-count="2"
+                  :max-select-count="2"
+                  :options="getSubMajorOptions()"
+                  @change="handleSubMajorChange"
+                />
               </div>
-              <div v-if="errors.submajors" class="mt-2 text-sm text-red-600">
-                {{ errors.submajors }}
+              <div v-if="errors.subMajors" class="mt-2 text-sm text-red-600">
+                {{ errors.subMajors }}
               </div>
             </div>
 
             <!-- Scores Section -->
             <div class="mb-6">
-              <h3 class="mb-3 text-sm text-gray-700 font-semibold">
+              <h3 class="mb-3 text-sm font-semibold">
                 成绩输入
               </h3>
 
               <!-- Unified Exam Score -->
               <div class="mb-4">
-                <label class="mb-2 block text-sm text-gray-700 font-medium">
-                  {{ majorCategory === 'music' ? '主项成绩' : '统考成绩' }}
+                <label class="mb-2 block text-sm font-medium">
+                  {{ majorCategory === '音乐类' ? '主项成绩' : '统考成绩' }}
                 </label>
                 <input
                   v-model="scores.unified"
                   type="number"
                   min="0"
-                  max="300"
-                  placeholder="0-300"
-                  class="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  :max="majorCategory === '体育类' ? 150 : 300"
+                  :placeholder="majorCategory === '体育类' ? '0-150' : '0-300'"
+                  class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                 <div v-if="errors.scores.unified" class="mt-2 text-sm text-red-600">
                   {{ errors.scores.unified }}
@@ -470,14 +449,14 @@ onUnmounted(() => {
 
               <!-- Culture Score -->
               <div class="mb-4">
-                <label class="mb-2 block text-sm text-gray-700 font-medium">文化成绩</label>
+                <label class="mb-2 block text-sm font-medium">文化成绩</label>
                 <input
                   v-model="scores.culture"
                   type="number"
                   min="0"
-                  :max="majorCategory === 'sports' ? 150 : 300"
-                  placeholder="0-{{ majorCategory === 'sports' ? 150 : 300 }}"
-                  class="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  max="300"
+                  placeholder="0-300"
+                  class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                 <div v-if="errors.scores.culture" class="mt-2 text-sm text-red-600">
                   {{ errors.scores.culture }}
@@ -487,28 +466,28 @@ onUnmounted(() => {
               <!-- Chinese & English Scores -->
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="mb-2 block text-sm text-gray-700 font-medium">语文成绩</label>
+                  <label class="mb-2 block text-sm font-medium">语文成绩</label>
                   <input
                     v-model="scores.chinese"
                     type="number"
                     min="0"
                     max="150"
                     placeholder="0-150"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                   <div v-if="errors.scores.chinese" class="mt-2 text-sm text-red-600">
                     {{ errors.scores.chinese }}
                   </div>
                 </div>
                 <div>
-                  <label class="mb-2 block text-sm text-gray-700 font-medium">英语成绩</label>
+                  <label class="mb-2 block text-sm font-medium">英语成绩</label>
                   <input
                     v-model="scores.english"
                     type="number"
                     min="0"
                     max="150"
                     placeholder="0-150"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                   <div v-if="errors.scores.english" class="mt-2 text-sm text-red-600">
                     {{ errors.scores.english }}

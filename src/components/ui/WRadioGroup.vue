@@ -53,19 +53,19 @@ const sizeClass = computed(() => {
   console.log(props.size)
   switch (props.size) {
     case 'large':
-      return 'px-6 py-3 border'
+      return 'px-6 py-3'
     case 'middle':
-      return 'px-4 py-2 border'
+      return 'px-4 py-2'
     case 'small':
-      return 'px-3 py-1.5 border text-sm'
+      return 'text-sm'
     default:
-      return 'px-4 py-2 border'
+      return 'px-4 py-2'
   }
 })
 </script>
 
 <template>
-  <div class="w-radio-group flex select-none overflow-hidden border border-gray-300 rounded-md shadow-sm" :class="[sizeClass]">
+  <div class="w-radio-group flex select-none overflow-hidden rounded-md shadow-sm" :class="[sizeClass]">
     <slot />
   </div>
 </template>

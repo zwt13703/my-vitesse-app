@@ -16,7 +16,9 @@ declare module 'vue' {
     TheFooter: typeof import('./components/TheFooter.vue')['default']
     TheInput: typeof import('./components/TheInput.vue')['default']
     TheNavigation: typeof import('./components/TheNavigation.vue')['default']
+    WOption: typeof import('./components/ui/WOption.vue')['default']
     WRadioButton: typeof import('./components/ui/WRadioButton.vue')['default']
     WRadioGroup: typeof import('./components/ui/WRadioGroup.vue')['default']
+    WSelect: typeof import('./components/ui/WSelect.vue')['default']
   }
 }
