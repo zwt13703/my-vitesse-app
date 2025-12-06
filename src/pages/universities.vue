@@ -11,10 +11,6 @@ useHead({
 <template>
   <div class="mx-auto max-w-7xl px-4 lg:px-8 sm:px-6">
     <div class="py-8">
-      <h1 class="mb-6 text-3xl text-gray-900 font-bold">
-        找大学
-      </h1>
-
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div class="rounded-lg bg-white p-6 shadow-md">
           <div class="py-6 text-center">

@@ -13,7 +13,7 @@ async function toggleLocales() {
 </script>
 
 <template>
-  <footer class="border-t border-gray-100 bg-white pb-8 pt-12 transition-colors duration-300 dark:border-gray-800 dark:bg-gray-900">
+  <footer class="select-none border-t border-gray-100 bg-white pb-8 pt-12 transition-colors duration-300 dark:border-gray-800 dark:bg-gray-900">
     <div class="mx-auto max-w-7xl px-4 lg:px-8 sm:px-6">
       <div class="grid grid-cols-1 mb-8 gap-8 md:grid-cols-4">
         <div class="col-span-1 md:col-span-1">

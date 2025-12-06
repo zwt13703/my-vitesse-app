@@ -94,7 +94,7 @@ function handleLogout() {
 
 <template>
   <nav
-    class="fixed left-0 right-0 top-0 z-50 bg-white shadow-md transition-transform duration-300 dark:bg-gray-900"
+    class="fixed left-0 right-0 top-0 z-50 select-none bg-white shadow-md transition-transform duration-300 dark:bg-gray-900"
     :class="isVisible ? 'translate-y-0' : '-translate-y-full'"
   >
     <div class="mx-auto max-w-7xl px-4 lg:px-8 sm:px-6">

@@ -19,7 +19,7 @@ const selectedSubMajors = ref<string[]>([]) // 专业选课
 const responseMenus = [
   {
     url: '/universities',
-    label: '查专业',
+    label: '查大学',
     icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
 
     animationDelay: '0.2s',
@@ -333,10 +333,108 @@ onMounted(() => {
 onUnmounted(() => {
   stopCarousel()
 })
+
+// 招生章程数据
+const admissionRegulations = ref([
+  { title: '2025年艺术类本科招生章程', link: '/regulations/art-2025' },
+  { title: '2025年体育类本科招生章程', link: '/regulations/sports-2025' },
+  { title: '2025年音乐类专业招生章程', link: '/regulations/music-2025' },
+  { title: '2025年舞蹈类专业招生章程', link: '/regulations/dance-2025' },
+  { title: '2025年美术类专业招生章程', link: '/regulations/art-2025' },
+])
+
+// 高考动态数据
+const examNews = ref([
+  { title: '2025年高考政策解读', link: '/news/policy-2025' },
+  { title: '艺术类招生趋势分析', link: '/news/art-trends' },
+  { title: '体育类专业录取规则', link: '/news/sports-rules' },
+  { title: '新高考选科指导', link: '/news/new-gaokao' },
+  { title: '志愿填报技巧分享', link: '/news/volunteer-tips' },
+])
+
+// 热门院校数据
+const popularSchools = ref([
+  {
+    name: '中央美术学院',
+    logo: 'http://img1.youzy.cn/content/media/thumbs/p00026840.jpeg',
+    major: '美术学、设计学',
+    tag: '艺术类名校',
+    region: '省外本科', // 添加区域信息
+  },
+  {
+    name: '北京体育大学',
+    logo: 'http://img1.youzy.cn/content/media/thumbs/p00026840.jpeg',
+    major: '体育教育、运动训练',
+    tag: '体育类名校',
+    region: '省外本科', // 添加区域信息
+  },
+  {
+    name: '中国音乐学院',
+    logo: 'http://img1.youzy.cn/content/media/thumbs/p00026840.jpeg',
+    major: '音乐表演、音乐学',
+    tag: '音乐类名校',
+    region: '省外本科', // 添加区域信息
+  },
+  {
+    name: '上海戏剧学院',
+    logo: 'http://img1.youzy.cn/content/media/thumbs/p00026840.jpeg',
+    major: '表演、导演',
+    tag: '艺术类名校',
+    region: '省外本科', // 添加区域信息
+  },
+  {
+    name: '河南大学',
+    logo: 'http://img1.youzy.cn/content/media/thumbs/p00026840.jpeg',
+    major: '美术学、音乐学',
+    tag: '河南名校',
+    region: '河南本科', // 添加区域信息
+  },
+  {
+    name: '郑州大学',
+    logo: 'http://img1.youzy.cn/content/media/thumbs/p00026840.jpeg',
+    major: '体育教育、设计学',
+    tag: '河南名校',
+    region: '河南本科', // 添加区域信息
+  },
+  {
+    name: '河南师范大学',
+    logo: 'http://img1.youzy.cn/content/media/thumbs/p00026840.jpeg',
+    major: '音乐学、美术学',
+    tag: '河南名校',
+    region: '河南本科', // 添加区域信息
+  },
+  {
+    name: '河南职业技术学院',
+    logo: 'http://img1.youzy.cn/content/media/thumbs/p00026840.jpeg',
+    major: '艺术设计、音乐表演',
+    tag: '河南专科',
+    region: '河南专科', // 添加区域信息
+  },
+])
+
+// 区域过滤状态
+const regionFilter = ref('全部') // 默认显示全部
+
+// 区域选项
+const regionOptions = [
+  { label: '全部', value: '全部' },
+  { label: '河南本科', value: '河南本科' },
+  { label: '河南专科', value: '河南专科' },
+  { label: '省外本科', value: '省外本科' },
+  { label: '省外专科', value: '省外专科' },
+]
+
+// 根据区域过滤学校
+const filteredSchools = computed(() => {
+  if (regionFilter.value === '全部') {
+    return popularSchools.value
+  }
+  return popularSchools.value.filter(school => school.region === regionFilter.value)
+})
 </script>
 
 <template>
-  <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8 sm:px-6">
+  <div class="mx-auto max-w-7xl select-none px-4 py-8 lg:px-8 sm:px-6">
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-10">
       <!-- Left Carousel (70% width on lg) -->
       <div class="lg:col-span-7">
@@ -366,7 +464,7 @@ onUnmounted(() => {
             <button
               v-for="(image, index) in carouselImages"
               :key="image.id"
-              class="h-3 w-3 rounded-full bg-white/70 hover:bg-white focus:outline-none"
+              class="h-3 w-3 rounded-full bg-dark-1 hover:bg-dark-3 focus:outline-none"
               :class="index === currentSlide ? 'opacity-100' : 'opacity-50'"
               @click="goToSlide(index)"
             >
@@ -588,6 +686,96 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
+
+    <!-- 招生章程、高考动态和热门院校推荐部分 -->
+    <div class="content-section mt-12 select-none">
+      <div class="dual-column-layout mb-10">
+        <div class="left-column">
+          <h3 class="mb-4 text-xl text-gray-800 font-bold dark:text-white">
+            招生章程
+          </h3>
+          <ul class="article-list space-y-2">
+            <li v-for="(item, index) in admissionRegulations" :key="`reg-${index}`">
+              <a :href="item.link" :title="item.title" class="block rounded-lg px-3 py-2 text-gray-700 transition-colors duration-200 hover:bg-gray-100 dark:text-gray-300 hover:text-blue-600 dark:hover:bg-gray-700 dark:hover:text-blue-400">
+                <div class="flex items-center">
+                  <svg class="mr-2 h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span class="truncate">{{ item.title }}</span>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="right-column">
+          <h3 class="mb-4 text-xl text-gray-800 font-bold dark:text-white">
+            高考动态
+          </h3>
+          <ul class="article-list space-y-2">
+            <li v-for="(item, index) in examNews" :key="`news-${index}`">
+              <a :href="item.link" :title="item.title" class="block rounded-lg px-3 py-2 text-gray-700 transition-colors duration-200 hover:bg-gray-100 dark:text-gray-300 hover:text-blue-600 dark:hover:bg-gray-700 dark:hover:text-blue-400">
+                <div class="flex items-center">
+                  <svg class="mr-2 h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  <span class="truncate">{{ item.title }}</span>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="popular-schools">
+        <h3 class="mb-4 text-xl text-gray-800 font-bold dark:text-white">
+          热门院校推荐
+        </h3>
+
+        <!-- 区域过滤器 -->
+        <div class="region-filter mb-6">
+          <div class="flex flex-wrap gap-2" role="radiogroup" aria-label="选择院校区域">
+            <button
+              v-for="option in regionOptions"
+              :key="option.value"
+              class="region-filter-btn transform rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:scale-105 aria-checked:bg-blue-600 aria-checked:text-white aria-checked:font-semibold hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" :class="[
+                regionFilter === option.value
+                  ? 'bg-blue-600 text-white font-semibold shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600',
+              ]"
+              :aria-checked="regionFilter === option.value"
+              role="radio"
+              @click="regionFilter = option.value"
+            >
+              {{ option.label }}
+            </button>
+          </div>
+        </div>
+
+        <div class="school-grid grid grid-cols-1 gap-4 lg:grid-cols-3 md:grid-cols-2 xl:grid-cols-4">
+          <div v-for="(school, index) in filteredSchools" :key="`school-${index}`" class="border border-gray-200 rounded-xl bg-white p-4 transition-all duration-300 dark:border-gray-700 hover:border-blue-300 dark:bg-gray-800 hover:shadow-lg dark:hover:border-blue-500 dark:hover:shadow-xl">
+            <div class="flex">
+              <div class="school-logo mr-4 h-16 w-16 flex-shrink-0">
+                <img :src="school.logo" :alt="school.name" class="h-full w-full rounded-full object-contain">
+              </div>
+              <div class="school-info min-w-0 flex-1">
+                <div class="school-name mb-1 truncate text-gray-800 font-bold dark:text-white" :title="school.name">
+                  {{ school.name }}
+                </div>
+                <div class="school-major mb-2 truncate text-sm text-gray-600 dark:text-gray-400" :title="school.major">
+                  热门专业：{{ school.major }}
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="school-tag max-w-[80px] truncate rounded bg-gray-100 px-2 py-1 text-xs text-gray-600 dark:bg-gray-700 dark:text-gray-300" :title="school.tag">{{ school.tag }}</span>
+                  <button class="view-btn rounded-lg bg-blue-600 px-3 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
+                    查看院校
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -616,6 +804,132 @@ onUnmounted(() => {
 .animate-fade-in-up {
   animation: fadeInUp 0.6s ease-out forwards;
   opacity: 0;
+}
+
+/* 招生章程、高考动态和热门院校推荐部分样式 */
+.dual-column-layout {
+  display: flex;
+  gap: 30px;
+}
+
+.left-column,
+.right-column {
+  flex: 1;
+}
+
+.article-list {
+  list-style: none;
+  padding: 0;
+}
+
+.article-list li {
+  margin-bottom: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.popular-schools h3 {
+  margin-bottom: 20px;
+}
+
+.school-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.school-logo {
+  width: 60px;
+  height: 60px;
+  margin-right: 15px;
+}
+
+.school-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.school-info {
+  flex: 1;
+}
+
+.school-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.school-major {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.school-tag {
+  font-size: 12px;
+  color: #888;
+}
+
+.view-btn {
+  padding: 4px 12px;
+  background: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .dual-column-layout {
+    flex-direction: column;
+  }
+
+  .school-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 区域过滤器样式 */
+.region-filter-btn {
+  position: relative;
+  overflow: hidden;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 80px;
+  white-space: nowrap;
+}
+
+.region-filter-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.region-filter-btn:hover::before {
+  left: 100%;
+}
+
+.region-filter-btn:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* 为活动状态添加更明显的视觉效果 */
+.region-filter-btn.active {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
 }
 </style>
 
