@@ -293,23 +293,12 @@ const paginatedUniversities = computed(() => {
 <template>
   <div class="mx-auto max-w-7xl px-4 lg:px-8 sm:px-6">
     <!-- Top Section: Filters -->
-    <div class="mb-8 rounded-lg bg-white p-6 shadow">
-      <!-- Top Toolbar -->
-      <div class="flex space-x-4">
-        <FilterBar @change="handleDataChange" />
-      </div>
-      <!-- <div class="flex space-x-4">
-        <div class="mt-8 p-4 border border-dashed border-gray-300 rounded">
-          <p>当前筛选条件: {{ JSON.stringify(currentFilters) }}</p>
-          <p>当前搜索词: {{ currentKeyword }}</p>
-        </div>
-      </div> -->
-
-      <!-- Middle Section: University List and Right Side -->
-      <div class="grid grid-cols-1 mb-8 mt-8 select-none gap-6 lg:grid-cols-4">
-        <!-- Left Side: University List -->
-        <div class="lg:col-span-3">
-          <div class="mb-4 flex items-center justify-between">
+    <div class="mb-8 mt-8 rounded-lg bg-white p-6 shadow">
+      <div class="grid grid-cols-1 select-none gap-6 lg:grid-cols-6">
+        <!-- Top Toolbar -->
+        <div class="lg:col-span-4">
+          <FilterBar @change="handleDataChange" />
+          <div class="mb-4 mt-4 flex items-center justify-between">
             <h2 class="text-lg font-semibold">
               大学: {{ filteredUniversities.length }}
             </h2>
@@ -429,7 +418,7 @@ const paginatedUniversities = computed(() => {
                 :key="page"
                 :class="[
                   currentPage === getPageNumber(page)
-                    ? 'bg-orange-500 text-white'
+                    ? 'bg-blue-500 text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-50',
                 ]"
                 class="border border-gray-300 rounded-md px-3 px-3 py-2 py-2 text-sm text-sm font-medium"
@@ -455,18 +444,21 @@ const paginatedUniversities = computed(() => {
             </button>
           </div>
         </div>
-
-        <!-- Right Side: Reserved Space -->
-        <div class="lg:col-span-1">
-          <div
-            class="h-full flex items-center justify-center border border-gray-200 rounded-lg bg-gray-50 p-6"
-          >
+        <div class="lg:col-span-2">
+          <div class="h-full flex items-center justify-center border border-gray-200 rounded-lg bg-gray-50 p-6">
             <p class="text-gray-500">
               预留空间
             </p>
           </div>
         </div>
       </div>
+
+      <!-- <div class="flex space-x-4">
+        <div class="mt-8 p-4 border border-dashed border-gray-300 rounded">
+          <p>当前筛选条件: {{ JSON.stringify(currentFilters) }}</p>
+          <p>当前搜索词: {{ currentKeyword }}</p>
+        </div>
+      </div> -->
     </div>
 
     <!-- Bottom Section: Reserved Space -->

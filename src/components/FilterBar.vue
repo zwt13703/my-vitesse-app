@@ -166,7 +166,7 @@ onUnmounted(() => {
     <!-- 顶部栏：筛选按钮组 + 搜索框 -->
     <div class="flex flex-wrap items-center justify-between gap-4">
       <!-- 左侧：4个下拉筛选器 -->
-      <div class="flex items-center gap-3">
+      <div class="flex flex-wrap items-center gap-3">
         <div
           v-for="filter in filters"
           :key="filter.key"
@@ -174,8 +174,8 @@ onUnmounted(() => {
         >
           <!-- 筛选器按钮 -->
           <button
-            class="h-9 w-24 flex items-center justify-between border rounded bg-white px-3 transition-colors hover:border-orange-400"
-            :class="activeFilter === filter.key ? 'border-orange-500 ring-1 ring-orange-200' : 'border-gray-200'"
+            class="h-9 w-24 flex items-center justify-between border rounded bg-white px-3 transition-colors hover:border-blue-400"
+            :class="activeFilter === filter.key ? 'border-blue-500 ring-1 ring-blue-200' : 'border-gray-200'"
             @click="toggleFilter(filter.key)"
           >
             <span class="truncate">{{ getLabel(filter.key) }}</span>
@@ -188,7 +188,7 @@ onUnmounted(() => {
       </div>
 
       <!-- 右侧：搜索框 -->
-      <div class="flex items-center">
+      <div class="flex flex-wrap items-center">
         <div class="relative">
           <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
             <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
@@ -196,12 +196,12 @@ onUnmounted(() => {
           <input
             v-model="searchQuery"
             type="text"
-            class="h-9 w-64 border border-gray-300 rounded-l bg-white py-2 pl-9 pr-4 text-gray-700 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-200 placeholder-gray-400"
+            class="h-9 w-50 border border-gray-300 rounded-l bg-white py-2 pl-9 pr-4 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-200 placeholder-gray-400"
             placeholder="输入院校名称"
           >
         </div>
         <button
-          class="h-9 rounded-r bg-orange-500 px-6 text-white transition-colors active:bg-orange-700 hover:bg-orange-600 focus:outline-none"
+          class="h-9 rounded-r bg-blue-500 px-6 text-white transition-colors active:bg-blue-700 hover:bg-blue-600 focus:outline-none"
           @click="handleSearch"
         >
           搜索
@@ -219,10 +219,10 @@ onUnmounted(() => {
       leave-from-class="transform scale-100 opacity-100"
       leave-to-class="transform scale-95 opacity-0"
     >
+      <!-- style="min-width: 600px;" -->
       <div
         v-if="activeFilter"
         class="absolute left-0 top-full z-50 mt-2 border border-gray-100 rounded-lg bg-white p-5 shadow-xl"
-        style="min-width: 600px;"
       >
         <!-- 下拉内容区域 -->
 
@@ -230,13 +230,13 @@ onUnmounted(() => {
         <div v-if="activeFilter === 'location'">
           <div class="flex items-start gap-4">
             <span class="mt-1 shrink-0 text-gray-400 font-medium">院校所属</span>
-            <div class="grid grid-cols-6 gap-2">
+            <div class="xs:grid-cols-3 grid gap-2 lg:grid-cols-6 md:grid-cols-5 sm:grid-cols-3">
               <button
                 v-for="city in locations"
                 :key="city"
-                class="rounded px-3 py-1.5 text-center transition-colors hover:text-orange-500"
+                class="rounded px-3 py-1.5 text-center transition-colors hover:text-blue-500"
                 :class="selectedFilters.location === city
-                  ? 'bg-orange-50 text-orange-500 font-medium'
+                  ? 'bg-blue-50 text-blue-500 font-medium'
                   : 'text-gray-600 bg-gray-50 hover:bg-gray-100'"
                 @click="selectOption('location', city)"
               >
@@ -254,17 +254,17 @@ onUnmounted(() => {
         <!-- 底部操作按钮 -->
         <div class="mt-6 flex items-center justify-between border-t border-gray-100 pt-4">
           <div class="text-gray-500">
-            已选 <span class="text-orange-500 font-bold">{{ countSelected }}</span> 个
+            已选 <span class="text-blue-500 font-bold">{{ countSelected }}</span> 个
           </div>
           <div class="flex gap-3">
             <button
-              class="border border-orange-500 rounded px-4 py-1.5 text-orange-500 transition-colors hover:bg-orange-50"
+              class="border border-blue-500 rounded px-4 py-1.5 text-blue-500 transition-colors hover:bg-blue-50"
               @click="clearCurrentFilter"
             >
               清空已选
             </button>
             <button
-              class="rounded bg-orange-500 px-6 py-1.5 text-white transition-colors hover:bg-orange-600"
+              class="rounded bg-blue-500 px-6 py-1.5 text-white transition-colors hover:bg-blue-600"
               @click="confirmSelection"
             >
               确定

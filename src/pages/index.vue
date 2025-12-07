@@ -554,7 +554,7 @@ const filteredSchools = computed(() => {
                   class="border rounded-lg px-4 py-2 text-sm font-medium transition-colors"
                   :class="selectedElectives.includes(option.value)
                     ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-gray-50 border-gray-300 hover:bg-gray-100'"
+                    : 'bg-gray-50 dark:bg-gray-300 dark:text-gray-800 border-gray-300 hover:bg-gray-100'"
                   @click="handleElectiveChange(option.value)"
                 >
                   {{ option.label }}
@@ -690,7 +690,7 @@ const filteredSchools = computed(() => {
     <!-- 招生章程、高考动态和热门院校推荐部分 -->
     <div class="content-section mt-12 select-none">
       <div class="dual-column-layout mb-10">
-        <div class="left-column">
+        <div class="left-column border-r-2 border-r-gray-800 border-dashed pr-4 dark:border-r-gray-400">
           <h3 class="mb-4 text-xl text-gray-800 font-bold dark:text-white">
             招生章程
           </h3>
