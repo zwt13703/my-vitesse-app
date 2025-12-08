@@ -26,6 +26,7 @@ declare module 'vue-router/auto-routes' {
     '/majors': RouteRecordInfo<'/majors', '/majors', Record<never, never>, Record<never, never>>,
     '/privacy-policy': RouteRecordInfo<'/privacy-policy', '/privacy-policy', Record<never, never>, Record<never, never>>,
     '/README': RouteRecordInfo<'/README', '/README', Record<never, never>, Record<never, never>>,
+    '/school/[schoolCode]': RouteRecordInfo<'/school/[schoolCode]', '/school/:schoolCode', { schoolCode: ParamValue<true> }, { schoolCode: ParamValue<false> }>,
     '/simulate': RouteRecordInfo<'/simulate', '/simulate', Record<never, never>, Record<never, never>>,
     '/universities': RouteRecordInfo<'/universities', '/universities', Record<never, never>, Record<never, never>>,
   }
