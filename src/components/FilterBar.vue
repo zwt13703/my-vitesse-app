@@ -9,6 +9,14 @@ export interface FilterState {
   sort: string
 }
 
+interface Props {
+  sortEnabled?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  sortEnabled: false,
+})
+
 // 定义 Emits (声明组件会触发哪些事件)
 const emit = defineEmits<{
   (e: 'change', payload: { keyword: string, filters: FilterState }): void
@@ -106,6 +114,11 @@ const countSelected = computed(() => {
   return 0
 })
 
+function shouldShowFilter(filter: FilterConfig) {
+  // 显示所有非排序过滤器，或者当排序过滤器启用时显示排序过滤器
+  return filter.key !== 'sort' || (filter.key === 'sort' && props.sortEnabled)
+}
+
 // --- 方法 ---
 
 // 切换下拉菜单
@@ -169,6 +182,7 @@ onUnmounted(() => {
       <div class="flex flex-wrap items-center gap-3">
         <div
           v-for="filter in filters"
+          v-show="shouldShowFilter(filter)"
           :key="filter.key"
           class="relative"
         >

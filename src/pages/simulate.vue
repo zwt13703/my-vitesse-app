@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { FilterState } from '~/components/FilterBar.vue'
 import { onMounted, ref } from 'vue'
 
 // --- 类型定义 ---
@@ -32,8 +33,11 @@ interface MajorDetail {
   code: string
   name: string
   prob: number
-  score: number
-  req: string
+  score: number // 最低分
+  diff: number // 线差
+  plan: number // 计划数
+  req: string // 选科
+  tuition: string
 }
 
 // --- 状态数据 ---
@@ -55,6 +59,11 @@ const showModal = ref(false)
 const currentSchool = ref<School | null>(null)
 const modalLoading = ref(false)
 const modalMajors = ref<MajorDetail[]>([])
+
+// 选课/志愿相关状态
+const selectedMajorCodes = ref<string[]>([]) // 存储已选的专业Code，数组顺序即为志愿顺序
+const showSaveConfirm = ref(false) // 控制气泡确认框显示
+const isSaving = ref(false) // 保存接口Loading状态
 
 // --- 模拟数据生成器 ---
 function generateMockData(count: number, startId: number) {
@@ -119,21 +128,68 @@ async function openMajorModal(school: School) {
   showModal.value = true
   modalLoading.value = true
   modalMajors.value = []
+  // 重置弹窗内的状态
+  selectedMajorCodes.value = []
+  showSaveConfirm.value = false
 
-  // 模拟获取该学校其他专业
+  // 模拟获取该学校其他专业（更丰富的数据）
   setTimeout(() => {
     modalMajors.value = [
-      { code: '02', name: '汉语言文学', prob: 98, score: 460, req: '历史+不限' },
-      { code: '03', name: '学前教育', prob: 92, score: 455, req: '历史/政治' },
-      { code: '04', name: '英语 (师范)', prob: 75, score: 470, req: '不限' },
-      { code: '05', name: '网络工程', prob: 60, score: 440, req: '物理+化学' },
+      { code: '02', name: '汉语言文学', prob: 98, score: 460, diff: 45, plan: 12, req: '历史+不限', tuition: '4000/年' },
+      { code: '03', name: '学前教育', prob: 92, score: 455, diff: 40, plan: 8, req: '历史/政治', tuition: '4000/年' },
+      { code: '04', name: '英语 (师范)', prob: 75, score: 470, diff: 55, plan: 5, req: '不限', tuition: '5000/年' },
+      { code: '05', name: '网络工程', prob: 60, score: 440, diff: 25, plan: 20, req: '物理+化学', tuition: '5500/年' },
+      { code: '06', name: '数据科学', prob: 45, score: 480, diff: 65, plan: 4, req: '物理+化学', tuition: '6000/年' },
     ]
     modalLoading.value = false
-  }, 600)
+  }, 400)
+}
+
+// 2. 选择/取消专业 (点击行内按钮)
+function toggleMajor(major: MajorDetail) {
+  const index = selectedMajorCodes.value.indexOf(major.code)
+  if (index > -1) {
+    // 已存在，移除
+    selectedMajorCodes.value.splice(index, 1)
+  }
+  else {
+    // 不存在，加入
+    selectedMajorCodes.value.push(major.code)
+  }
+}
+
+// 获取按钮状态显示文本
+function getVolunteerBtnText(code: string) {
+  const index = selectedMajorCodes.value.indexOf(code)
+  if (index > -1) {
+    return `志愿 ${index + 1}`
+  }
+  return '加入志愿单'
+}
+
+// 3. 保存逻辑
+async function saveVolunteers() {
+  if (isSaving.value)
+    return
+  isSaving.value = true
+
+  // 模拟 API 调用
+  setTimeout(() => {
+    console.warn('保存成功，已选专业代码:', selectedMajorCodes.value)
+
+    // 成功后关闭
+    isSaving.value = false
+    showSaveConfirm.value = false
+    closeModal()
+
+    // 这里可以加一个全局 Toast 提示 "保存成功"
+    console.warn('保存志愿成功！')
+  }, 1000)
 }
 
 function closeModal() {
   showModal.value = false
+  showSaveConfirm.value = false
 }
 
 function getStatusColor(status: string) {
@@ -160,6 +216,14 @@ function handleResize() {
   if (window.innerWidth >= 1024 && schools.value.length === 0 && !isLoading.value) {
     loadMore()
   }
+}
+
+const currentFilters = ref<FilterState | null>(null)
+const currentKeyword = ref('')
+function handleDataChange(data: { keyword: string, filters: FilterState }) {
+  console.warn('发起请求:', data.keyword, data.filters)
+  currentKeyword.value = data.keyword
+  currentFilters.value = data.filters
 }
 </script>
 
@@ -195,6 +259,14 @@ function handleResize() {
     <!-- <div class="h-screen mx-auto max-w-7xl select-none px-4 py-8 lg:px-8 sm:px-6"> -->
 
     <!-- 顶部筛选栏 (保持不变) -->
+    <div class="mb-8 mt-8 rounded-lg bg-white p-6 shadow">
+      <div class="grid grid-cols-1 select-none gap-6 lg:grid-cols-6">
+        <!-- Top Toolbar -->
+        <div class="lg:col-span-4">
+          <FilterBar :sort-enabled="false" @change="handleDataChange" />
+        </div>
+      </div>
+    </div>
     <div class="flex flex-shrink-0 space-x-2">
       <button
         v-for="tab in tabs"
@@ -401,76 +473,197 @@ function handleResize() {
     </div>
 
     <!-- 弹窗层 (Modal) -->
+    <!-- =========================================================
+         弹窗层 (Modal) - 重点更新区域
+    ========================================================== -->
     <Teleport to="body">
       <div v-if="showModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm" @click.self="closeModal">
-        <div class="max-h-[80vh] w-[800px] flex flex-col animate-fade-in-up overflow-hidden rounded-lg bg-white shadow-xl">
-          <!-- 弹窗头部 -->
-          <div class="flex items-center justify-between border-b border-slate-200 bg-slate-50 p-4">
+        <!-- 宽度加宽至 1100px 以容纳更多列 -->
+        <div class="h-[85vh] w-[1100px] flex flex-col animate-fade-in-up overflow-hidden rounded-lg bg-white shadow-2xl">
+          <!-- Header -->
+          <div class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-6 py-4">
             <div>
-              <h3 class="text-lg text-slate-800 font-bold">
-                {{ currentSchool?.name }}
-              </h3>
-              <p class="text-xs text-slate-500">
-                其他可报专业列表
+              <div class="flex items-end gap-3">
+                <h3 class="text-xl text-slate-800 font-bold">
+                  {{ currentSchool?.name }}
+                </h3>
+                <span class="text-sm text-slate-500">院校代码: {{ currentSchool?.code }}</span>
+              </div>
+              <p class="mt-1 text-xs text-slate-500">
+                该院校下符合您选科要求的其他专业列表
               </p>
             </div>
-            <button class="text-slate-400 hover:text-slate-600" @click="closeModal">
+            <button class="rounded-full p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-600" @click="closeModal">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
-          <!-- 弹窗内容 -->
-          <div class="flex-1 overflow-auto p-0">
-            <table class="w-full text-left text-sm">
-              <thead class="sticky top-0 bg-slate-50 text-xs text-slate-500 uppercase">
+          <!-- Content: Table -->
+          <div class="flex-1 overflow-auto bg-slate-50 p-0">
+            <table class="w-full border-collapse text-left text-sm">
+              <thead class="sticky top-0 z-10 bg-slate-100 text-xs text-slate-500 font-semibold tracking-wider uppercase shadow-sm">
                 <tr>
-                  <th class="px-6 py-3">
-                    专业名称
+                  <th class="w-16 px-6 py-3">
+                    代码
                   </th>
                   <th class="px-6 py-3">
+                    专业名称 / 选科 / 学费
+                  </th>
+                  <th class="px-6 py-3 text-center">
                     录取概率
                   </th>
-                  <th class="px-6 py-3">
-                    最低分
+                  <th class="px-6 py-3 text-center">
+                    24年最低分
                   </th>
-                  <th class="px-6 py-3">
-                    选科要求
+                  <th class="px-6 py-3 text-center">
+                    24年线差
+                  </th>
+                  <th class="px-6 py-3 text-center">
+                    招生计划
+                  </th>
+                  <th class="sticky right-0 bg-slate-100 px-6 py-3 text-center shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]">
+                    加入志愿
                   </th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-100">
+              <tbody class="bg-white divide-y divide-slate-100">
                 <tr v-if="modalLoading">
-                  <td colspan="4" class="p-8 text-center text-slate-500">
-                    加载中...
+                  <td colspan="7" class="p-12 text-center text-slate-400">
+                    <svg class="mx-auto mb-2 h-8 w-8 animate-spin text-blue-400" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Z" opacity="0.2" /><path fill="currentColor" d="M12 2A10 10 0 0 1 22 12h-2a8 8 0 0 0-8-8V2Z" /></svg>
+                    正在获取专业数据...
                   </td>
                 </tr>
-                <tr v-for="major in modalMajors" :key="major.code" class="hover:bg-slate-50">
-                  <td class="px-6 py-4 text-slate-900 font-medium">
-                    {{ major.name }}
+                <tr v-for="major in modalMajors" v-else :key="major.code" class="group transition-colors hover:bg-blue-50/30">
+                  <td class="px-6 py-4 text-xs text-slate-400 font-mono">
+                    {{ major.code }}
                   </td>
                   <td class="px-6 py-4">
-                    <span :class="{ 'text-green-600': major.prob >= 80, 'text-orange-500': major.prob < 80 }">
-                      {{ major.prob }}%
-                    </span>
+                    <div class="text-base text-slate-800 font-bold">
+                      {{ major.name }}
+                    </div>
+                    <div class="mt-1 flex gap-2 text-xs text-slate-500">
+                      <span class="rounded bg-slate-100 px-1.5 py-0.5">{{ major.req }}</span>
+                      <span class="rounded bg-slate-100 px-1.5 py-0.5">{{ major.tuition }}</span>
+                    </div>
                   </td>
-                  <td class="px-6 py-4">
+                  <td class="px-6 py-4 text-center">
+                    <span class="font-bold" :class="major.prob >= 80 ? 'text-green-600' : 'text-orange-500'">{{ major.prob }}%</span>
+                  </td>
+                  <td class="px-6 py-4 text-center font-medium">
                     {{ major.score }}
                   </td>
-                  <td class="px-6 py-4 text-xs text-slate-500">
-                    {{ major.req }}
+                  <td class="px-6 py-4 text-center text-slate-500">
+                    {{ major.diff }}
+                  </td>
+                  <td class="px-6 py-4 text-center text-slate-500">
+                    {{ major.plan }}人
+                  </td>
+
+                  <!-- 操作列：加入/移除 -->
+                  <td class="sticky right-0 bg-white px-6 py-4 text-center shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] group-hover:bg-blue-50/30">
+                    <button
+                      class="min-w-[90px] rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200"
+                      :class="[
+                        selectedMajorCodes.includes(major.code)
+                          ? 'bg-red-50 text-red-500 border border-red-200 hover:bg-red-100' // 选中状态：红色，显示志愿序号
+                          : 'bg-white text-blue-600 border border-blue-500 hover:bg-blue-50', // 未选状态：蓝色
+                      ]"
+                      @click="toggleMajor(major)"
+                    >
+                      {{ getVolunteerBtnText(major.code) }}
+                    </button>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          <!-- 弹窗底部 -->
-          <div class="border-t border-slate-200 p-4 text-right">
-            <button class="rounded bg-slate-100 px-4 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-200" @click="closeModal">
-              关闭
-            </button>
+          <!-- Footer: Confirm with Popover -->
+          <div class="relative flex items-center justify-between border-t border-slate-200 bg-white p-4">
+            <div class="text-sm text-slate-500">
+              已选 <span class="text-lg text-blue-600 font-bold">{{ selectedMajorCodes.length }}</span> 个志愿
+            </div>
+
+            <div class="relative flex gap-3">
+              <button class="px-5 py-2 text-sm text-slate-600 hover:text-slate-900" @click="closeModal">
+                取消
+              </button>
+
+              <!--
+                气泡确认框 (Popconfirm) 实现逻辑
+                如果不想封装组件，这种 inline 方式最简单
+              -->
+              <div class="relative">
+                <!-- 主按钮 -->
+                <w-popconfirm
+                  title="底部右对齐" placement="top-right"
+                  :ok-button-props="{ loading: isSaving }"
+                  @confirm="saveVolunteers"
+                >
+                  <button
+                    :disabled="isSaving"
+                    class="rounded bg-blue-600 px-6 py-2 text-sm text-white font-medium shadow-md transition-colors disabled:cursor-not-allowed hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    确认保存
+                  </button>
+                  <!-- Slots -->
+                  <template #icon>
+                    <span class="text-xl">🎉</span>
+                  </template>
+                  <template #title>
+                    <span class="text-purple-600">确认要保存吗？</span>
+                  </template>
+                  <template #description>
+                    这里可以放很长很长的<br>HTML内容哦。
+                  </template>
+                </w-popconfirm>
+
+                <!-- 气泡层 -->
+                <div
+                  v-if="showSaveConfirm"
+                  class="absolute bottom-full right-0 z-50 mb-3 w-64 animate-fade-in-up border border-slate-200 rounded-lg bg-white p-4 shadow-xl"
+                >
+                  <!-- 小三角 -->
+                  <div class="absolute right-6 h-3 w-3 rotate-45 border-b border-r border-slate-200 bg-white -bottom-1.5" />
+
+                  <div class="mb-3 flex items-start gap-3">
+                    <div class="mt-0.5 text-orange-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm text-slate-800 font-bold">
+                        确认提交志愿？
+                      </p>
+                      <p class="mt-1 text-xs text-slate-500">
+                        提交后将更新您的志愿表，已选 {{ selectedMajorCodes.length }} 个专业。
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="flex justify-end gap-2">
+                    <button
+                      class="rounded px-2 py-1 text-xs text-slate-500 hover:bg-slate-100"
+                      @click="showSaveConfirm = false"
+                    >
+                      再想想
+                    </button>
+                    <button
+                      class="flex items-center gap-1 rounded bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700"
+                      :disabled="isSaving"
+                      @click="saveVolunteers"
+                    >
+                      <span v-if="isSaving" class="h-3 w-3 animate-spin border-2 border-white/30 border-t-white rounded-full" />
+                      {{ isSaving ? '保存中' : '确定' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <!-- End of Popconfirm -->
+            </div>
           </div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ScoreFormData } from './ScoreForm.vue'
 import { useWindowScroll } from '@vueuse/core' // 假设你使用了 VueUse
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -20,6 +21,24 @@ const routerLinkList = [
   { path: '/universities', name: 'universities', label: '找大学' },
   { path: '/majors', name: 'majors', label: '找专业' },
 ] as const
+
+// 编辑成绩菜单
+const isScoreModalOpen = ref(false)
+
+// 处理表单提交的回调
+function handleScoreFormConfirm(data: ScoreFormData) {
+  console.warn('接收到表单数据:', data)
+
+  // 这里可以进行 API 调用
+  // api.submit(data).then(...)
+}
+function openScoreFormModal() {
+  isScoreModalOpen.value = true
+}
+
+function closeScoreFormModal() {
+  isScoreModalOpen.value = false
+}
 
 // Scroll handling
 const { y } = useWindowScroll()
@@ -93,7 +112,7 @@ function handleMobileLinkClick() {
     <div class="mx-auto max-w-7xl px-4 lg:px-8 sm:px-6">
       <div class="h-16 flex items-center justify-between">
         <!-- 1. Logo (左侧，始终显示) -->
-        <div class="flex flex-shrink-0 items-center">
+        <div class="w-48 flex flex-none items-center">
           <img
             src="https://yitisheng.vip/assets/logo.0e7b79fc.png"
             alt="艺体志愿宝logo"
@@ -102,7 +121,7 @@ function handleMobileLinkClick() {
         </div>
 
         <!-- 2. 桌面端菜单 (在大屏幕 md 以上显示，小屏幕隐藏) -->
-        <div class="hidden items-center md:flex space-x-8">
+        <div class="hidden flex-1 items-center md:flex space-x-8">
           <router-link
             v-for="item in routerLinkList"
             :id="item.name"
@@ -131,14 +150,29 @@ function handleMobileLinkClick() {
             </button>
           </template>
 
-          <div v-else class="flex items-center space-x-2">
-            <span class="text-sm text-gray-700 dark:text-gray-200">欢迎, {{ userStore.user.username }}</span>
-            <button
-              class="rounded-md bg-red-600 px-4 py-2 text-sm text-white font-medium transition-colors dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600"
-              @click="handleLogout"
-            >
-              退出
-            </button>
+          <div v-else class="flex items-center space-x-6">
+            <div class="flex items-center space-x-2">
+              <span class="border-r-2 border-gray-3 pr-2 text-sm text-gray-700 dark:text-gray-200">音乐类</span>
+              <span class="border-r-2 border-gray-3 pr-2 text-sm text-gray-700 dark:text-gray-200">文化成绩</span>
+              <span class="text-sm text-gray-700 dark:text-gray-200">334分</span>
+              <a target="_blank" class="cursor-pointer text-gray-400 transition-colors hover:text-gray-500 dark:hover:text-gray-300" @click="openScoreFormModal">
+                <div i-carbon:edit class="text-xs" />
+              </a>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-gray-700 dark:text-gray-200">欢迎, {{ userStore.user.username }}</span>
+              <a href="https://github.com/antfu/vitesse" target="_blank" class="text-gray-400 transition-colors hover:text-gray-500 dark:hover:text-gray-300">
+                <span class="sr-only">GitHub</span>
+                <div i-carbon:document-horizontal class="text-xl text-gray-8" />
+              </a>
+              <button
+                v-show="false"
+                class="rounded-md bg-red-600 px-4 py-2 text-sm text-white font-medium transition-colors dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600"
+                @click="handleLogout"
+              >
+                退出
+              </button>
+            </div>
           </div>
         </div>
 
@@ -211,16 +245,22 @@ function handleMobileLinkClick() {
 
           <template v-else>
             <div class="mb-3 flex items-center px-3">
-              <div class="text-base text-gray-800 font-medium dark:text-white">
-                欢迎, {{ userStore.user.username }}
-              </div>
+              <span class="border-r-2 border-gray-3 pr-2 text-sm text-gray-700 dark:text-gray-200">音乐类</span>
+              <span class="border-r-2 border-gray-3 pl-2 pr-2 text-sm text-gray-700 dark:text-gray-200">文化成绩</span>
+              <span class="pl-2 pr-2 text-sm text-gray-700 dark:text-gray-200">334</span>
+              <a target="_blank" class="cursor-pointer text-gray-400 transition-colors hover:text-gray-500 dark:hover:text-gray-300" @click="openScoreFormModal">
+                <div i-carbon:edit class="text-xs" />
+              </a>
             </div>
-            <button
-              class="block w-full rounded-md px-3 py-2 text-left text-base text-red-600 font-medium hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-800"
-              @click="handleLogout"
-            >
-              退出登录
-            </button>
+            <div class="mb-3 flex items-center px-3">
+              <span>欢迎, {{ userStore.user.username }}</span>
+              <button
+                class="block rounded-md px-3 py-2 text-left text-base text-red-600 font-medium hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-800"
+                @click="handleLogout"
+              >
+                退出登录
+              </button>
+            </div>
           </template>
         </div>
       </div>
@@ -286,6 +326,23 @@ function handleMobileLinkClick() {
           登录
         </button>
       </div>
+    </div>
+  </div>
+  <div v-if="isScoreModalOpen" class="fixed inset-0 z-50 flex select-none items-center justify-center bg-black bg-opacity-50 px-4">
+    <div class="max-w-md w-full border rounded-lg bg-white p-6 shadow-xl transition-all dark:border-gray-700 dark:bg-gray-800">
+      <div class="mb-4 flex items-center justify-between">
+        <h3 class="text-xl text-gray-900 font-bold dark:text-white">
+          修改你的高考信息
+        </h3>
+        <button
+          class="text-3xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+          @click="closeScoreFormModal"
+        >
+          ×
+        </button>
+      </div>
+      <!-- 使用组件并监听 confirm 事件 -->
+      <ScoreForm @confirm="handleScoreFormConfirm" />
     </div>
   </div>
 </template>

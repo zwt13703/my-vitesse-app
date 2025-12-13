@@ -29,7 +29,7 @@ async function toggleLocales() {
           <h3 class="mb-4 text-sm text-gray-900 font-semibold tracking-wider uppercase dark:text-white">
             平台服务
           </h3>
-          <ul class="space-y-3">
+          <ul class="xs:grid-cols-2 grid gap-4">
             <li>
               <router-link to="/simulate" class="text-sm text-gray-500 transition-colors dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
                 模拟填报
@@ -45,6 +45,11 @@ async function toggleLocales() {
                 查专业
               </router-link>
             </li>
+            <li>
+              <router-link to="/majors" class="text-sm text-gray-500 transition-colors dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
+                省控线
+              </router-link>
+            </li>
           </ul>
         </div>
 
@@ -52,7 +57,7 @@ async function toggleLocales() {
           <h3 class="mb-4 text-sm text-gray-900 font-semibold tracking-wider uppercase dark:text-white">
             关于我们
           </h3>
-          <ul class="space-y-3">
+          <ul class="xs:grid-cols-2 grid gap-4">
             <li>
               <router-link to="/about" class="text-sm text-gray-500 transition-colors dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
                 关于平台
@@ -102,7 +107,7 @@ async function toggleLocales() {
       </div>
 
       <div class="flex flex-col items-center justify-between border-t border-gray-100 pt-8 md:flex-row dark:border-gray-800">
-        <div class="flex items-center gap-4 text-sm text-gray-400">
+        <div class="xs:grid-cols-2 grid items-center gap-4 text-sm text-gray-400 lg:grid-cols-3">
           <p class="text-sm text-gray-400">
             &copy; 2024-{{ new Date().getFullYear() }} 艺体志愿宝. All rights reserved.
           </p>

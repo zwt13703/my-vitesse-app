@@ -194,7 +194,7 @@ onUnmounted(() => {
       <div class="flex flex-1 flex-wrap items-center gap-2 overflow-hidden">
         <span v-if="isEmpty" class="select-none text-gray-400">{{ placeholder }}</span>
 
-        <span v-else-if="!isMultiple" class="select-none text-gray-700">
+        <span v-else-if="!isMultiple" class="select-none text-sm text-gray-700">
           {{ getLabel(Array.isArray(internalValue) ? internalValue[0] : internalValue) }}
         </span>
 
@@ -221,7 +221,7 @@ onUnmounted(() => {
         </template>
       </div>
 
-      <div class="ml-2 text-gray-400">
+      <div class="text-gray-400">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="h-5 w-5 transition-transform duration-200"
@@ -254,7 +254,7 @@ onUnmounted(() => {
           <li
             v-for="option in options"
             :key="option.value"
-            class="group flex cursor-pointer items-center justify-between px-4 py-2 text-sm transition-colors"
+            class="group flex cursor-pointer items-center justify-between py-2 pl-3 pr-2 text-sm transition-colors"
             :class="[
               isSelected(option.value) ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-100',
               isDisabledOption(option) ? 'opacity-50 cursor-not-allowed bg-gray-50' : '',
