@@ -75,13 +75,13 @@ const responseMenus = [
 const carouselImages = [
   {
     id: 1,
-    imageUrl: 'https://mp-7a4eecb1-2a04-4d36-b050-1c4a78cc31a4.cdn.bspapp.com/images/web-bakground/20250619212930.png',
+    imageUrl: 'https://cdn.jsdelivr.net/gh/zwt13703/note-gen-image-sync@main/d7e9af38-9292-4e7a-bb24-9321c8e1b931.png',
     linkUrl: '/simulate',
     altText: '艺术考生',
   },
   {
     id: 2,
-    imageUrl: 'https://mp-7a4eecb1-2a04-4d36-b050-1c4a78cc31a4.cdn.bspapp.com/images/web-bakground/20250619212921.jpg',
+    imageUrl: 'https://cdn.jsdelivr.net/gh/zwt13703/note-gen-image-sync@main/13274cb8-2c88-452b-b70b-9ca4e603606a.jpeg',
     linkUrl: '/universities',
     altText: '体育考生',
   },
